@@ -3,6 +3,7 @@
 ####
 
 # Obtener el texto de todos los ficheros de un directorio
+
 def obtainNews(path):
     import os
     dirs = os.listdir(path)
@@ -16,17 +17,21 @@ def obtainNews(path):
     return list
 
 # Operador de tokenización
+
+
 def tokenizeList(list):
     from nltk.tokenize import TweetTokenizer
     tokensList = []
     for elemento in list:
-        tmp= []
+        tmp = []
         tknzr = TweetTokenizer()
-        tmp = tknzr.tokenize(elemento)
+        tmp = tknzr.tokenize(elemento.decode('ISO-8859-1'))
         tokensList.append(tmp)
     return tokensList
 
 # Convierte a minusculas
+
+
 def transformCases(list):
     lowerTokens = []
     for tokens in list:
@@ -38,9 +43,11 @@ def transformCases(list):
     return lowerTokens
 
 # operador stop words
+
+
 def stopWords(list):
-    #import nltk
-    #nltk.download('stopwords')
+    import nltk
+    nltk.download('stopwords')
     from nltk.corpus import stopwords
     stop_words_sp = set(stopwords.words('spanish'))
     stopWordsList = []
@@ -54,6 +61,8 @@ def stopWords(list):
     return stopWordsList
 
 # operador de filtro por largo de palabra
+
+
 def filterLength(list):
     result = []
     for element in list:
@@ -65,6 +74,8 @@ def filterLength(list):
     return result
 
 # operador que elimina las URL's
+
+
 def removeURLs(list):
     result = []
     for element in list:
@@ -76,6 +87,8 @@ def removeURLs(list):
     return result
 
 # operador de lematización
+
+
 def stemList(list):
     from nltk.stem import SnowballStemmer
     spanish_stemmer = SnowballStemmer('spanish')
@@ -83,28 +96,31 @@ def stemList(list):
     for element in list:
         stemmed = []
         for word in element:
-            stemmed.append(spanish_stemmer.stem(word))
+            stemmed.append((spanish_stemmer.stem(word), 'desp'))
         stemmedList.append(stemmed)
     return stemmedList
 
 # esto es solo para comprobar eliminar en la versión final
-def doJob():
-    # Use a breakpoint in the code line below to debug your script.
-    path = "/home/rafa/Documents/" #variable de la caja de texto que ha hecho Carlos
-    noticias = obtainNews(path)
-    print(noticias)
-    tokensList = tokenizeList(noticias)
-    print(tokensList)
-    lower = transformCases(tokensList)
-    print(lower)
-    stop = stopWords(lower)
-    print(stop)
-    filter = filterLength(stop)
-    print(filter)
-    sinURL = removeURLs(filter)
-    print(sinURL)
-    stemmed = stemList(sinURL)
-    print(stemmed)
 
-if __name__ == '__main__':
-    doJob()
+
+# def doJob():
+#     # Use a breakpoint in the code line below to debug your script.
+#     path = "/home/rafa/Documents/"  # variable de la caja de texto que ha hecho Carlos
+#     noticias = obtainNews(path)
+#     print(noticias)
+#     tokensList = tokenizeList(noticias)
+#     print(tokensList)
+#     lower = transformCases(tokensList)
+#     print(lower)
+#     stop = stopWords(lower)
+#     print(stop)
+#     filter = filterLength(stop)
+#     print(filter)
+#     sinURL = removeURLs(filter)
+#     print(sinURL)
+#     stemmed = stemList(sinURL)
+#     print(stemmed)
+
+
+# if __name__ == '__main__':
+#     doJob()
