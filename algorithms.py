@@ -1,5 +1,5 @@
 import pickle
-def decisionTree(X, y):
+def decisionTree(X, y, self):
     from sklearn.model_selection import train_test_split
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.20)
     from sklearn.tree import DecisionTreeClassifier
@@ -7,14 +7,14 @@ def decisionTree(X, y):
     classifier.fit(X_train, y_train)
     y_pred = classifier.predict(X_test)
     from sklearn.metrics import classification_report, confusion_matrix
-    print(confusion_matrix(y_test, y_pred))
     print(classification_report(y_test, y_pred))
+    self.textBrowser_resultado.setText(classification_report(y_test, y_pred))
     with open('decision_tree_text_classifier', 'wb') as picklefile:
         pickle.dump(classifier,picklefile)
     plotAlgorithm(classifier, X_test, y_test)
 
 
-def randomForest(X, y):
+def randomForest(X, y,self):
     from sklearn.model_selection import train_test_split
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, test_size=0.2, random_state=0)
@@ -23,19 +23,13 @@ def randomForest(X, y):
     classifier.fit(X_train, y_train)
     y_pred = classifier.predict(X_test)
     from sklearn.metrics import classification_report, confusion_matrix, accuracy_score
-    print('### Random forest')
-    print(confusion_matrix(y_test, y_pred))
-    print('---------------------------\n')
-    print(classification_report(y_test, y_pred))
-    print('accuracy\n')
-    print(accuracy_score(y_test, y_pred))
-    print('\n')
+    self.textBrowser_resultado.setText(classification_report(y_test, y_pred))
     with open('random_forest_text_classifier', 'wb') as picklefile:
         pickle.dump(classifier,picklefile)
     plotAlgorithm(classifier, X_test, y_test)
 
 
-def supportVectorMachine(X, y):
+def supportVectorMachine(X, y, self):
     from sklearn.model_selection import train_test_split
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.20)
     from sklearn.svm import SVC
@@ -43,8 +37,7 @@ def supportVectorMachine(X, y):
     classifier.fit(X_train, y_train)
     y_pred = classifier.predict(X_test)
     from sklearn.metrics import classification_report, confusion_matrix
-    print(confusion_matrix(y_test, y_pred))
-    print(classification_report(y_test, y_pred))
+    self.textBrowser_resultado.setText(classification_report(y_test, y_pred))
     plotAlgorithm(classifier, X_test, y_test)
     with open('svm_text_classifier', 'wb') as picklefile:
         pickle.dump(classifier,picklefile)

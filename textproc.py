@@ -4,7 +4,7 @@ from nltk.corpus import stopwords
 def proccessText(rutaNoticias):
         newsData = load_files(rutaNoticias, encoding='latin-1')
         print(newsData.target_names)
-        X, y = newsData.data, newsData.target
+        X, y, filenames, targetNames = newsData.data, newsData.target, newsData.filenames, newsData.target_names
         documents = []
         from nltk.stem import WordNetLemmatizer
         stemmer = WordNetLemmatizer()
@@ -33,4 +33,4 @@ def proccessText(rutaNoticias):
         from sklearn.feature_extraction.text import TfidfTransformer
         tfidfconverter = TfidfTransformer()
         X = tfidfconverter.fit_transform(X).toarray()
-        return X,y
+        return X,y, filenames, targetNames
