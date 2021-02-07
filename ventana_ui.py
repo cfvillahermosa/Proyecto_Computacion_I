@@ -133,9 +133,9 @@ class Ui_MainWindow(object):
         self.label_despoblacion.setText(_translate("MainWindow", "Noticias de despoblación"))
         self.label_no_despoblacion.setText(_translate("MainWindow", "Noticias de no despoblación"))
         self.label_seleccionar_algoritmo.setText(_translate("MainWindow", "Seleccionar algoritmo:"))
-        self.lineEdit_despoblacion.setText(_translate("MainWindow", "Ruta"))
+        self.lineEdit_despoblacion.setText(_translate("MainWindow", "Ruta noticias despoblación"))
         self.pushButton_abrir_despoblacion.setText(_translate("MainWindow", "Abrir"))
-        self.lineEdit_no_despoblacion.setText(_translate("MainWindow", "Ruta"))
+        self.lineEdit_no_despoblacion.setText(_translate("MainWindow", "Ruta noticias no despoblación"))
         self.pushButton_abrir_no_despoblacion.setText(_translate("MainWindow", "Abrir"))
         self.textBrowser_vista_previa.setHtml(_translate("MainWindow", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
 "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
@@ -154,7 +154,7 @@ class Ui_MainWindow(object):
 "</style></head><body style=\" font-family:\'MS Shell Dlg 2\'; font-size:8.25pt; font-weight:400; font-style:normal;\">\n"
 "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-weight:600;\">Resultado:</span></p></body></html>"))
         self.label_guardar_modelo.setText(_translate("MainWindow", "Guardar modelo:"))
-        self.lineEdit_guardar_modelo.setText(_translate("MainWindow", "Ruta"))
+        self.lineEdit_guardar_modelo.setText(_translate("MainWindow", "Ruta modelo"))
         self.pushButton_guardar_modelo.setText(_translate("MainWindow", "Guardar"))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab), _translate("MainWindow", "Entrenamiento"))
         self.label_noticias_clasificar.setText(_translate("MainWindow", "Noticias para clasificar: "))

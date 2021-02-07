@@ -1,14 +1,26 @@
-import os
-import easygui
 from ventana_ui import *
 from textproc import *
-import nltk
+from algorithms import *
+from nltk.corpus import stopwords
+import pickle
+import os
+import re
 
+import easygui
+import nltk
+##########################################
+import numpy as np
 from nltk.tokenize import word_tokenize
+from sklearn.datasets import load_files
+nltk.download('wordnet')
+
+# import nltk
+
+nltk.download('stopwords')
 
 
 class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
-    ruta_despoblacion = ''
+    pathTrainNews = ''
 
     def __init__(self, *args, **kwargs):
         QtWidgets.QMainWindow.__init__(self, *args, **kwargs)
@@ -17,9 +29,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.pushButton_abrir_despoblacion.clicked.connect(
             self.abrirNoticiasDespoblacion)
 
-        # abrimos el explorador de archivos para las noticias de no despoblación
-        self.pushButton_abrir_no_despoblacion.clicked.connect(
-            self.abrirNoticasNoDespoblacion)
+        # # abrimos el explorador de archivos para las noticias de no despoblación
+        # self.pushButton_abrir_no_despoblacion.clicked.connect(
+        #     self.abrirNoticasNoDespoblacion)
 
         # rellenamos el comboBox con las distintas opciones de algoritmos
         self.setAlgoritmos()
@@ -27,14 +39,19 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # función ejecutar
         self.pushButton_ejecutar.clicked.connect(self.ejecutar)
 
+        #funcion cargar modelo
+        self.pushButton_abrir_no_despoblacion.clicked.connect(self.loadModel)
+
+        
+
     # Esta función abre el explorador de archivos para seleccionar las noticias de despoblación
     # Además establece en el elemento lineEdit asociado la ruta seleccionada
     def abrirNoticiasDespoblacion(self):
-        self.ruta_despoblacion = easygui.diropenbox()
-        list = os.listdir(self.ruta_despoblacion)
+        self.pathTrainNews = easygui.diropenbox()
+        list = os.listdir(self.pathTrainNews)
         numeroNoticiasDespoblacion = len(list)
         print(numeroNoticiasDespoblacion)
-        self.lineEdit_despoblacion.setText(self.ruta_despoblacion)
+        self.lineEdit_despoblacion.setText(self.pathTrainNews)
 
     # Esta función abre el explorador de archivos para seleccionar las noticias de no despoblación
     # Además establece en el elemento lineEdit asociado la ruta seleccionada
@@ -42,36 +59,58 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.lineEdit_no_despoblacion.setText(easygui.diropenbox())
 
     def setAlgoritmos(self):
-        self.comboBox.addItem('Árbol de decisión')
-        self.comboBox.addItem('Bayes')
+        self.comboBox.addItem('Decision tree')
+        self.comboBox.addItem('Random forest')
+        self.comboBox.addItem('SVM (Support Vector Machine)')
 
     def ejecutar(self):
-        list = obtainNews(self.ruta_despoblacion+'/')
-        tokenizedList = tokenizeList(list)
-        transformedCaseList = transformCases(tokenizedList)
-        stoppedWordsList = stopWords(transformedCaseList)
-        filteredListByLength = filterLength(stoppedWordsList)
-        deletedUrlsList = removeURLs(filteredListByLength)
-        # nltk.download('punkt')
-        stemmedList = stemList(deletedUrlsList)
-        classifier = nltk.NaiveBayesClassifier.train(stemmedList)
-        # print(stemmedList)
-        # train = [('I love this sandwich.', 'pos'),
-        #          ('This is an amazing place!', 'pos'),
-        #          ('I feel very good about these beers.', 'pos'),
-        #          ('This is my best work.', 'pos'),
-        #          ("What an awesome view", 'pos'),
-        #          ('I do not like this restaurant', 'neg'),
-        #          ('I am tired of this stuff.', 'neg'),
-        #          ("I can't deal with this", 'neg'),
-        #          ('He is my sworn enemy!', 'neg'),
-        #          ('My boss is horrible.', 'neg')]
-        # all_words = set(word.lower()
-        #                 for passage in train for word in word_tokenize(passage[0]))
-        # t = [({word: (word in word_tokenize(x[0]))
-        #        for word in all_words}, x[1]) for x in train]
-        # print(t)
-        print(classifier)
+        X,y = proccessText(self.pathTrainNews)
+
+        selectedAlgorithm = self.comboBox.currentText()
+
+        if selectedAlgorithm == 'Random forest':
+            print('### random forest')
+            randomForest(X,y)
+            # plotter(X,y)
+        elif selectedAlgorithm == 'Decision tree':
+            print('### decision tree')
+            decisionTree(X,y)
+            # plotter(X,y)
+        elif selectedAlgorithm == 'SVM (Support Vector Machine)':
+            print('### SVM')
+            supportVectorMachine(X,y)
+            # plotter(X,y)
+
+    def loadModel(self):
+        self.pathModelNews = easygui.diropenbox()
+        X,y = proccessText(self.pathModelNews)
+        with open('decision_tree_text_classifier', 'rb') as training_model:
+            model = pickle.load(training_model)
+
+        from sklearn.model_selection import train_test_split
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.20)
+
+        y_pred2 = model.predict(X_test)
+        from sklearn.metrics import classification_report, confusion_matrix, accuracy_score
+        print(confusion_matrix(y_test, y_pred2))
+        print(classification_report(y_test, y_pred2))
+        print(accuracy_score(y_test, y_pred2)) 
+
+        ### grafico matplob
+        # import matplotlib.pyplot as plt  
+        # from sklearn.datasets import make_classification
+        # from sklearn.metrics import plot_confusion_matrix
+        # from sklearn.model_selection import train_test_split
+        # from sklearn.svm import SVC
+        # X, y = make_classification(random_state=0)
+        # X_train, X_test, y_train, y_test = train_test_split(
+        #         X, y, random_state=0)
+        # clf = SVC(random_state=0)
+        # clf.fit(X_train, y_train)
+
+        # plot_confusion_matrix(clf, X_test, y_test)  
+        # plt.show()
+
 
 
 if __name__ == "__main__":
@@ -79,7 +118,3 @@ if __name__ == "__main__":
     window = MainWindow()
     window.show()
     app.exec_()
-
-
-[({'deal': False, 'these': False, 'he': False, 'an': False, 'awesome': False, 'best': False, 'tired': False, 'about': False, 'sworn': False, 'is': False, '.': True, 'horrible': False, 'i': False, 'am': False, 'like': False, 'ca': False, 'my': False, 'view': False, 'amazing': False, 'of': False, 'sandwich': True, 'with': False, 'very': False, 'feel': False, 'work': False, 'not': False, 'boss': False, 'what': False, 'love': True, 'stuff': False, '!': False, 'this': True, "n't": False, 'good': False, 'enemy': False, 'beers': False, 'place': False, 'restaurant': False, 'do': False}, 'pos'), ({'deal': False, 'these': False, 'he': False, 'an': True, 'awesome': False, 'best': False, 'tired': False, 'about': False, 'sworn': False, 'is': True, '.': False, 'horrible': False, 'i': False, 'am': False, 'like': False, 'ca': False, 'my': False, 'view': False, 'amazing': True, 'of': False, 'sandwich': False, 'with': False, 'very': False, 'feel': False, 'work': False, 'not': False, 'boss': False, 'what': False, 'love': False, 'stuff': False, '!': True, 'this': False, "n't": False, 'good': False, 'enemy': False, 'beers': False, 'place': True, 'restaurant': False, 'do': False}, 'pos'), ({'deal': False, 'these': True, 'he': False, 'an': False, 'awesome': False, 'best': False, 'tired': False, 'about': True, 'sworn': False, 'is': False, '.': True, 'horrible': False, 'i': False, 'am': False, 'like': False, 'ca': False, 'my': False, 'view': False, 'amazing': False, 'of': False, 'sandwich': False, 'with': False, 'very': True, 'feel': True, 'work': False, 'not': False, 'boss': False, 'what': False, 'love': False, 'stuff': False, '!': False, 'this': False, "n't": False, 'good': True, 'enemy': False, 'beers': True, 'place': False, 'restaurant': False, 'do': False}, 'pos'), ({'deal': False, 'these': False, 'he': False, 'an': False, 'awesome': False, 'best': True, 'tired': False, 'about': False, 'sworn': False, 'is': True, '.': True, 'horrible': False, 'i': False, 'am': False, 'like': False, 'ca': False, 'my': True, 'view': False, 'amazing': False, 'of': False, 'sandwich': False, 'with': False, 'very': False, 'feel': False, 'work': True, 'not': False, 'boss': False, 'what': False, 'love': False, 'stuff': False, '!': False, 'this': False, "n't": False, 'good': False, 'enemy': False, 'beers': False, 'place': False, 'restaurant': False, 'do': False}, 'pos'), ({'deal': False, 'these': False, 'he': False, 'an': True, 'awesome': True, 'best': False, 'tired': False, 'about': False, 'sworn': False, 'is': False, '.': False, 'horrible': False, 'i': False, 'am': False, 'like': False, 'ca': False, 'my': False, 'view': True, 'amazing': False, 'of': False, 'sandwich': False, 'with': False, 'very': False, 'feel': False, 'work': False, 'not': False, 'boss': False, 'what': False, 'love': False, 'stuff': False, '!': False, 'this': False, "n't": False, 'good': False, 'enemy': False, 'beers': False, 'place': False, 'restaurant': False, 'do': False}, 'pos'),
- ({'deal': False, 'these': False, 'he': False, 'an': False, 'awesome': False, 'best': False, 'tired': False, 'about': False, 'sworn': False, 'is': False, '.': False, 'horrible': False, 'i': False, 'am': False, 'like': True, 'ca': False, 'my': False, 'view': False, 'amazing': False, 'of': False, 'sandwich': False, 'with': False, 'very': False, 'feel': False, 'work': False, 'not': True, 'boss': False, 'what': False, 'love': False, 'stuff': False, '!': False, 'this': True, "n't": False, 'good': False, 'enemy': False, 'beers': False, 'place': False, 'restaurant': True, 'do': True}, 'neg'), ({'deal': False, 'these': False, 'he': False, 'an': False, 'awesome': False, 'best': False, 'tired': True, 'about': False, 'sworn': False, 'is': False, '.': True, 'horrible': False, 'i': False, 'am': True, 'like': False, 'ca': False, 'my': False, 'view': False, 'amazing': False, 'of': True, 'sandwich': False, 'with': False, 'very': False, 'feel': False, 'work': False, 'not': False, 'boss': False, 'what': False, 'love': False, 'stuff': True, '!': False, 'this': True, "n't": False, 'good': False, 'enemy': False, 'beers': False, 'place': False, 'restaurant': False, 'do': False}, 'neg'), ({'deal': True, 'these': False, 'he': False, 'an': False, 'awesome': False, 'best': False, 'tired': False, 'about': False, 'sworn': False, 'is': False, '.': False, 'horrible': False, 'i': False, 'am': False, 'like': False, 'ca': True, 'my': False, 'view': False, 'amazing': False, 'of': False, 'sandwich': False, 'with': True, 'very': False, 'feel': False, 'work': False, 'not': False, 'boss': False, 'what': False, 'love': False, 'stuff': False, '!': False, 'this': True, "n't": True, 'good': False, 'enemy': False, 'beers': False, 'place': False, 'restaurant': False, 'do': False}, 'neg'), ({'deal': False, 'these': False, 'he': False, 'an': False, 'awesome': False, 'best': False, 'tired': False, 'about': False, 'sworn': True, 'is': True, '.': False, 'horrible': False, 'i': False, 'am': False, 'like': False, 'ca': False, 'my': True, 'view': False, 'amazing': False, 'of': False, 'sandwich': False, 'with': False, 'very': False, 'feel': False, 'work': False, 'not': False, 'boss': False, 'what': False, 'love': False, 'stuff': False, '!': True, 'this': False, "n't": False, 'good': False, 'enemy': True, 'beers': False, 'place': False, 'restaurant': False, 'do': False}, 'neg'), ({'deal': False, 'these': False, 'he': False, 'an': False, 'awesome': False, 'best': False, 'tired': False, 'about': False, 'sworn': False, 'is': True, '.': True, 'horrible': True, 'i': False, 'am': False, 'like': False, 'ca': False, 'my': False, 'view': False, 'amazing': False, 'of': False, 'sandwich': False, 'with': False, 'very': False, 'feel': False, 'work': False, 'not': False, 'boss': True, 'what': False, 'love': False, 'stuff': False, '!': False, 'this': False, "n't": False, 'good': False, 'enemy': False, 'beers': False, 'place': False, 'restaurant': False, 'do': False}, 'neg')]
